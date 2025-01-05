@@ -30,7 +30,7 @@ const ApplyNow = () => {
     e.preventDefault();
     
     try {
-      const response = await fetch('http://localhost:5000/apply', {
+      const response = await fetch('/api/apply', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -226,7 +226,7 @@ const ApplyNow = () => {
               />
             </div>
           </div>
-          {message && <p className="text-center text-red-500">{message}</p>}
+          {message && <p className={`text-center ${message.includes('success') ? 'text-green-500 ': 'text-red-500'} `}>{message}</p>}
           <button
             type="submit"
             className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition duration-300 text-xs"
