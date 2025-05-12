@@ -16,11 +16,11 @@ const Footer = () => {
               <div className="row">
                 <div className="data">
                   <i className="bi bi-telephone icon"></i>
-                  <div className="text"> +250788282252</div>
+                  <div className="text"> +250 788 282 252</div>
                 </div>
                 <div className="data">
                   <i className="bi bi-at icon"></i>
-                  <div className="text"> info@biarwanda.com</div>
+                  <div className="text"> info@biafricantouch.com</div>
                 </div>
                 <div className="data">
                   <i className="bi bi-geo-alt icon"></i>

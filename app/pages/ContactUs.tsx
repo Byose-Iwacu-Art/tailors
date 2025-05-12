@@ -104,7 +104,7 @@ const ContactUs = () => {
           </div>
           <div className="flex items-center mb-4">
             <i className="bi bi-envelope text-3xl text-gray-600 mr-3" />
-            <p className="text-gray-700">clients@biafricantouch.com</p>
+            <p className="text-gray-700">info@biafricantouch.com</p>
           </div>
         </div>
 
