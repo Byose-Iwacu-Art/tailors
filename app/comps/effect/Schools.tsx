@@ -31,8 +31,8 @@ const SchoolsPage = () => {
       mapUrl: "https://maps.google.com/maps?q=musanze+muhoza+sector+youth+center&t=&z=15&ie=UTF8&iwloc=&output=embed",
       address: "123 Musanze St, Musanze District, Rwanda",
       principal: {
-        name: "John Doe",
-        contact: "+250 123 456 789",
+        name: "Umutoni Gisele",
+        contact: "+250 788 282 252",
       },
       courses: [
         "Tailoring Startup Level 1-3",

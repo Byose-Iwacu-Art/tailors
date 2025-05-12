@@ -100,11 +100,11 @@ const ContactUs = () => {
           </div>
           <div className="flex items-center mb-4">
             <i className="bi bi-telephone text-3xl text-gray-600 mr-3" />
-            <p className="text-gray-700">+250 788 888 888</p>
+            <p className="text-gray-700">+250 788 282 252</p>
           </div>
           <div className="flex items-center mb-4">
             <i className="bi bi-envelope text-3xl text-gray-600 mr-3" />
-            <p className="text-gray-700">info@tailorsdreamcollege.rw</p>
+            <p className="text-gray-700">clients@biafricantouch.com</p>
           </div>
         </div>
 
