@@ -327,26 +327,26 @@ interface Testimonial {
 
 const testimonials: Testimonial[] = [
   {
-    image: '/imgs/testmonials/t2.jpg',
-    name: 'John Doe',
+    image: '/logo/favicon.ico',
+    name: 'Jean Baptiste Uwimana',
     role: 'Graduated Student',
     text: "Tailor's Dream College gave me the confidence and skills to pursue my career. The hands-on experience was invaluable!",
   },
   {
-    image: '/imgs/testmonials/t1.jpg',
-    name: 'Jane Smith',
+    image: '/logo/favicon.ico',
+    name: 'Marie Claire Mukamana',
     role: 'Fashion Designer',
     text: "The learning environment here is unparalleled. I've been able to turn my passion into a successful business.",
   },
   {
-    image: '/imgs/testmonials/t2.jpg',
-    name: 'Sam Wilson',
+    image: '/logo/favicon.ico',
+    name: 'Emmanuel Nkurunziza',
     role: 'Creative Director',
     text: 'From day one, I knew I was in the right place. The instructors were mentors, helping me shape my future.',
   },
   {
-    image: '/imgs/testmonials/t1.jpg',
-    name: 'Joseph Reveur',
+    image: '/logo/favicon.ico',
+    name: 'Esperance Uwizeye',
     role: 'Full-stack Developer',
     text: "Working with BIA - Tailor's dream college is the good choice ever. Helped me to shape my future.",
   },
