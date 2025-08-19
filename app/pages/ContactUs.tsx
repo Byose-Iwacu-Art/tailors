@@ -1,198 +1,251 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const ContactUs = () => {
-  const [isChatVisible, setIsChatVisible] = useState(false); // Start with chat hidden
   const [message, setMessage] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [typing, setTyping] = useState(false);
-  const [chatHistory, setChatHistory] = useState<string[]>([]);
+  const [phone, setPhone] = useState("");
+  const [subject, setSubject] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Function to handle sending a message via the contact form
+  const contactMethods = [
+    {
+      id: 1,
+      icon: "bi-geo-alt-fill",
+      title: "Visit Our Campus",
+      primary: "Giporoso Market Place",
+      secondary: "SAR Motor, Kigali",
+      color: "from-yellow-500 to-orange-500"
+    },
+    {
+      id: 2,
+      icon: "bi-telephone-fill",
+      title: "Call Us Now",
+      primary: "+250 788 282 252",
+      secondary: "Available 24/7",
+      color: "from-yellow-500 to-orange-500"
+    },
+    {
+      id: 3,
+      icon: "bi-envelope-fill",
+      title: "Email Support",
+      primary: "info@biafricantouch.com",
+      secondary: "Quick response guaranteed",
+      color: "from-yellow-500 to-orange-500"
+    }
+  ];
+
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
+    setIsSubmitting(true);
+    setResponseMessage(""); // Clear previous messages
 
-    if (name.trim() && email.trim() && message.trim()) {
-      // Send message to the backend
-      try {
-        const response = await fetch("http://localhost:5000/contact", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name, email, message }),
-        });
+    // Validate required fields
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      setResponseMessage("Please fill in all required fields (Name, Email, and Message).");
+      setIsSubmitting(false);
+      return;
+    }
 
-        const data = await response.json();
+    // Prepare form data
+    const formData = {
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      subject: subject || "General Inquiry",
+      message: message.trim(),
+      timestamp: new Date().toISOString()
+    };
 
-        if (response.ok) {
-          setResponseMessage("Message sent successfully!");
-          setChatHistory((prev) => [...prev, `You: ${message}`]);
-          setMessage("");
-          setName("");
-          setEmail("");
-        } else {
-          setResponseMessage(data.message || "An error occurred.");
-        }
-      } catch (error) {
-        setResponseMessage("An error occurred while sending the message.");
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setResponseMessage("Thank you! Your message has been sent successfully. We'll get back to you within 24 hours.");
+        // Clear form on success
+        setMessage("");
+        setName("");
+        setEmail("");
+        setPhone("");
+        setSubject("");
+      } else {
+        // Handle API error responses
+        setResponseMessage(
+          result.error || 
+          result.message || 
+          "Something went wrong. Please try again or contact us directly."
+        );
       }
-      setTyping(false);
-    }
-  };
-
-  // Effect to simulate typing indicator
-  useEffect(() => {
-    if (typing) {
-      const timer = setTimeout(() => {
-        setTyping(false);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [typing]);
-
-  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(e.target.value);
-    setTyping(true);
-  };
-
-  const handleChatInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMessage(e.target.value);
-    setTyping(true);
-  };
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-  };
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-  };
-
-  // Function to toggle chat visibility
-  const toggleChat = () => {
-    setIsChatVisible((prev) => !prev);
-  };
-
-  // Function to handle sending chat messages (optional)
-  const handleSendChatMessage = () => {
-    if (message.trim()) {
-      setChatHistory((prev) => [...prev, `You: ${message}`]);
-      setMessage("");
-      setTyping(false);
+    } catch (error) {
+      console.error('Contact form error:', error);
+      setResponseMessage("Network error. Please check your connection and try again, or contact us directly.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="w-full bg-gray-100 py-12 flex flex-col items-center">
-      <h2 className="text-2xl font-semibold text-center mb-10 text-gray-800">Contact Us</h2>
+    <div className="w-full bg-gray-50 py-12 lg:py-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
+            Contact Us
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Have questions about our programs? We're here to help you start your fashion journey.
+          </p>
+        </div>
 
-      <div className="max-w-[90%] w-full grid grid-cols-1 md:grid-cols-2 gap-10 px-5 md:px-10">
-        {/* Contact Information */}
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full md:w-4/5 mx-auto">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Get in Touch</h3>
-          <div className="flex items-center mb-4">
-            <i className="bi bi-geo-alt text-3xl text-gray-600 mr-3" />
-            <p className="text-gray-700">Giporoso Market Place, SAR Motor, Kigali</p>
-          </div>
-          <div className="flex items-center mb-4">
-            <i className="bi bi-telephone text-3xl text-gray-600 mr-3" />
-            <p className="text-gray-700">+250 788 282 252</p>
-          </div>
-          <div className="flex items-center mb-4">
-            <i className="bi bi-envelope text-3xl text-gray-600 mr-3" />
-            <p className="text-gray-700">info@biafricantouch.com</p>
-          </div>
+        {/* Contact Methods */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {contactMethods.map((method) => (
+            <div
+              key={method.id}
+              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group border border-gray-100"
+            >
+              <div className="relative p-6 bg-gradient-to-br from-yellow-50 to-orange-50">
+                <div className="flex items-center space-x-3">
+                  <div className="relative group-hover:scale-105 transition-transform duration-300">
+                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full p-1">
+                      <div className="w-full h-full bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
+                        <i className={`${method.icon} text-white text-lg`}></i>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-base font-semibold text-gray-800 mb-1">{method.title}</h4>
+                    <p className="text-sm text-gray-700">{method.primary}</p>
+                    <p className="text-xs text-gray-600">{method.secondary}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Contact Form */}
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full md:w-4/5 mx-auto">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Send a Message</h3>
-          <form className="flex flex-col space-y-4" onSubmit={handleSendMessage}>
-            <input
-              type="text"
-              placeholder="Your Name"
-              className="border border-gray-300 rounded-lg px-3 py-2 outline-none"
-              value={name}
-              onChange={handleNameChange}
-              required
-            />
-            <input
-              type="email"
-              placeholder="Your Email"
-              className="border border-gray-300 rounded-lg px-3 py-2 outline-none"
-              value={email}
-              onChange={handleEmailChange}
-              required
-            />
-            <textarea
-              placeholder="Your Message"
-              className="border border-gray-300 rounded-lg px-3 py-2 h-24 outline-none"
-              value={message}
-              onChange={handleMessageChange} // This is correct for the textarea
-              required
-            />
-            <button type="submit" className="bg-orange-600 text-white rounded-lg px-4 py-2">
-              Send Message
-            </button>
-            {responseMessage && (
-              <p className="text-green-600">{responseMessage}</p>
-            )}
-          </form>
-        </div>
-      </div>
-
-      {/* Live Chat Button */}
-      <div className="fixed bottom-5 right-5 z-50">
-        {!isChatVisible ? (
-          <button 
-            onClick={toggleChat}
-            className="bg-sky-600 text-white rounded-lg px-4 py-2 flex items-center"
-          >
-            <i className="bi bi-chat text-lg mr-2"></i>
-            Chat with Us!
-          </button>
-        ) : (
-          <div className="bg-white shadow-lg rounded-lg w-full max-w-md p-4">
-            <div className="bg-sky-700 bg-opacity-80 text-white rounded-t-lg py-3 px-4 text-lg text-center font-semibold flex justify-between items-center">
-              <span>Live Chat</span>
-              <button onClick={toggleChat} className="text-white">
-                <i className="bi bi-x-lg"></i>
-              </button>
-            </div>
-            <div className="h-[50vh] overflow-y-auto my-2 border border-gray-300 rounded-md p-2">
-              {chatHistory.map((msg, index) => (
-                <p key={index} className="text-sky-900 mb-1">{msg}</p>
-              ))}
-              {typing && (
-                <div className="flex items-center mb-1 text-xs">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse mr-1"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse mr-1"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                  <span className="text-gray-400 ml-2">Typing...</span>
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100">
+            <div className="relative p-6 bg-gradient-to-br from-yellow-50 to-orange-50">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full p-1">
+                  <div className="w-full h-full bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
+                    <i className="bi bi-envelope-paper text-white text-lg"></i>
+                  </div>
                 </div>
-              )}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">Send us a Message</h3>
+                  <p className="text-sm text-gray-600">We'll respond within 24 hours</p>
+                </div>
+              </div>
             </div>
-            <div className="flex">
-              <input
-                type="text"
-                placeholder="Type your message..."
-                value={message}
-                onChange={handleChatInputChange} // Use a different handler for chat input
-                className="border border-gray-200 rounded-l-lg p-2 flex-1 outline-none text-md"
-              />
-              <button 
-                className="bg-orange-600 text-white rounded-r-lg px-4"
-                onClick={handleSendChatMessage} // Call the chat send function
-              >
-                <i className="bi bi-send"></i>
-              </button>
+            
+            <div className="p-6">
+              <form onSubmit={handleSendMessage} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Your Name *"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <input
+                      type="email"
+                      placeholder="Email Address *"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <input
+                      type="tel"
+                      placeholder="Phone Number"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+                    />
+                  </div>
+                  
+                  <div>
+                    <select
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+                    >
+                      <option value="">Select Subject</option>
+                      <option value="admissions">Admissions Inquiry</option>
+                      <option value="programs">Program Information</option>
+                      <option value="visit">Campus Visit</option>
+                      <option value="financial">Financial Aid</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <textarea
+                    placeholder="Tell us about your interests and questions... *"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 resize-none"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !name.trim() || !email.trim() || !message.trim()}
+                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Sending...
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      Send Message
+                      <i className="bi bi-arrow-right ml-2"></i>
+                    </div>
+                  )}
+                </button>
+
+                {responseMessage && (
+                  <div className={`p-4 rounded-lg ${responseMessage.includes('successfully') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                    <div className="flex items-center">
+                      <i className={`${responseMessage.includes('successfully') ? 'bi bi-check-circle' : 'bi bi-exclamation-circle'} mr-2`}></i>
+                      {responseMessage}
+                    </div>
+                  </div>
+                )}
+              </form>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
