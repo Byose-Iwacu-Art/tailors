@@ -5,6 +5,8 @@ import "./styles/globals.css";
 import NavBar from "./pages/navbar";
 import Footer from "./pages/footer";
 import Preloader from "./comps/effect/Preloader";
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 
 const inter = Inter({ subsets: ["latin"] });
 
