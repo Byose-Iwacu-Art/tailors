@@ -228,14 +228,29 @@ const WhyChooseUS = () => {
 // Gallery Component
 const Gallery = () => {
   const images = [
+    "/gallery/DSC_0783.jpg",
+    "/gallery/DSC_0776.jpg",
+    "/gallery/DSC_0768.jpg",
+    "/gallery/DSC_0779 (1).jpg",
+    "/gallery/DSC_0780.jpg",
     "/imgs/slides/s1.jpg",
     "/imgs/slides/s2.jpg",
     "/imgs/slides/s3.jpg",
+    "/gallery/DSC_0772.jpg",
     "/imgs/slides/s4.jpg",
     "/imgs/slides/s5.jpg",
     "/imgs/slides/s6.jpg",
     "/imgs/slides/s7.jpg",
     "/imgs/slides/s8.jpg",
+    "/gallery/DSC_0742.jpg",
+    "/gallery/DSC_0744.jpg",
+    "/gallery/DSC_0749.jpg",
+    "/gallery/DSC_0754.jpg",
+    "/gallery/DSC_0757.jpg",
+    "/gallery/DSC_0761.jpg",
+    
+    
+    
   ];
 
   return (
