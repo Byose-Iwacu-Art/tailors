@@ -47,9 +47,11 @@ const SchoolsPage: React.FC = () => {
         "Product Finishing",
       ],
       images: [
-        "/imgs/schools/kigali/s2.jpg",
-        "/imgs/schools/kigali/s7.jpg",
-        "/imgs/schools/kigali/s8.jpg",
+        "/gallery/DSC_0783.JPG",
+        "/gallery/DSC_0744.JPG",
+        "/gallery/DSC_0768.JPG",
+        "/gallery/DSC_0776.JPG",
+        "/gallery/DSC_0772.JPG"
       ],
       features: ["Modern Equipment", "Experienced Instructors", "Flexible Schedules"],
       students: "150+ Students",
@@ -60,7 +62,7 @@ const SchoolsPage: React.FC = () => {
       name: "Musanze Branch",
       location: "Near Youth Center",
       mapUrl: "https://maps.google.com/maps?q=musanze+muhoza+sector+youth+center&t=&z=15&ie=UTF8&iwloc=&output=embed",
-      address: "123 Musanze St, Musanze District, Rwanda",
+      address: "Youth center, Muhoza, Musanze District",
       principal: {
         name: "Umutoni Gisele",
         contact: "+250 788 282 252",
