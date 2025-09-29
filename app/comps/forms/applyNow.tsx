@@ -15,6 +15,10 @@ interface FormData {
   dob: string;
 }
 
+interface FormErrors {
+  [key: string]: string;
+}
+
 const ApplyNow: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
@@ -30,18 +34,141 @@ const ApplyNow: React.FC = () => {
     dob: '',
   });
 
+  const [errors, setErrors] = useState<FormErrors>({});
   const [message, setMessage] = useState<string>('');
+
+  // Validation functions
+  const validateName = (name: string): string => {
+    if (!name.trim()) return 'This field is required';
+    if (name.trim().length < 2) return 'Name must be at least 2 characters';
+    if (!/^[a-zA-Z\s\-']+$/.test(name)) return 'Name can only contain letters, spaces, hyphens, and apostrophes';
+    if (/\d/.test(name)) return 'Name cannot contain numbers';
+    return '';
+  };
+
+  const validatePhone = (phone: string): string => {
+    if (!phone.trim()) return 'Phone number is required';
+    // Remove spaces and hyphens for validation
+    const cleanPhone = phone.replace(/[\s\-]/g, '');
+    if (!/^\+?[0-9]{10,15}$/.test(cleanPhone)) return 'Please enter a valid phone number (10-15 digits)';
+    return '';
+  };
+
+  const validateEmail = (email: string): string => {
+    if (!email.trim()) return 'Email is required';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return 'Please enter a valid email address';
+    return '';
+  };
+
+  const validateTextField = (value: string, fieldName: string): string => {
+    if (!value.trim()) return `${fieldName} is required`;
+    if (value.trim().length < 2) return `${fieldName} must be at least 2 characters`;
+    if (!/^[a-zA-Z\s\-']+$/.test(value)) return `${fieldName} can only contain letters, spaces, and hyphens`;
+    return '';
+  };
+
+  const validateDate = (date: string): string => {
+    if (!date) return 'Date of birth is required';
+    const selectedDate = new Date(date);
+    const today = new Date();
+    
+    if (selectedDate > today) return 'Date of birth cannot be in the future';
+    
+    // Calculate age properly accounting for month and day
+    let age = today.getFullYear() - selectedDate.getFullYear();
+    const monthDiff = today.getMonth() - selectedDate.getMonth();
+    const dayDiff = today.getDate() - selectedDate.getDate();
+    
+    // If birthday hasn't occurred this year yet, subtract 1 from age
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--;
+    }
+    
+    if (age < 16) return 'You must be at least 16 years old';
+    if (age > 100) return 'Please enter a valid date of birth';
+    return '';
+  };
+
+  const validateField = (name: string, value: string): string => {
+    switch (name) {
+      case 'firstName':
+        return validateName(value);
+      case 'secondName':
+        return validateName(value);
+      case 'phone':
+        return validatePhone(value);
+      case 'email':
+        return validateEmail(value);
+      case 'district':
+        return validateTextField(value, 'District');
+      case 'sector':
+        return validateTextField(value, 'Sector');
+      case 'cell':
+        return validateTextField(value, 'Cell');
+      case 'village':
+        return validateTextField(value, 'Village');
+      case 'status':
+        return !value ? 'Please select marital status' : '';
+      case 'gender':
+        return !value ? 'Please select gender' : '';
+      case 'dob':
+        return validateDate(value);
+      default:
+        return '';
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
+    
     setFormData({
       ...formData,
       [name]: value,
     });
+
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: '',
+      });
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>): void => {
+    const { name, value } = e.target;
+    const error = validateField(name, value);
+    
+    if (error) {
+      setErrors({
+        ...errors,
+        [name]: error,
+      });
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    
+    Object.keys(formData).forEach((key) => {
+      const error = validateField(key, formData[key as keyof FormData]);
+      if (error) {
+        newErrors[key] = error;
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (): Promise<void> => {
+    setMessage('');
+    
+    if (!validateForm()) {
+      setMessage("Please fix all validation errors before submitting.");
+      return;
+    }
     
     try {
       const response = await fetch('/api/apply', {
@@ -69,12 +196,19 @@ const ApplyNow: React.FC = () => {
           gender: '',
           dob: '',
         });
+        setErrors({});
       } else {
         setMessage(result.message || "Failed to submit application.");
       }
     } catch (error) {
       setMessage("An error occurred while submitting the application.");
       console.error("Error:", error);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent): void => {
+    if (e.key === 'Enter') {
+      handleSubmit();
     }
   };
 
@@ -105,12 +239,12 @@ const ApplyNow: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-800">Application Form</h2>
-                <p className="text-xs text-gray-600">Please fill in all required fields</p>
+                <p className="text-xs text-gray-600">Please fill in all required fields with valid information</p>
               </div>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6">
+          <div className="p-6" onKeyPress={handleKeyPress}>
             <div className="space-y-6">
               {/* Personal Information */}
               <div>
@@ -129,11 +263,19 @@ const ApplyNow: React.FC = () => {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       id="firstName"
                       placeholder="Enter your first name"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                      required
+                      className={`w-full border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
+                        errors.firstName ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
+                    {errors.firstName && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <i className="bi bi-exclamation-circle mr-1"></i>
+                        {errors.firstName}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="secondName" className="block text-xs font-medium text-gray-700 mb-1">
@@ -144,11 +286,19 @@ const ApplyNow: React.FC = () => {
                       name="secondName"
                       value={formData.secondName}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       id="secondName"
                       placeholder="Enter your second name"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                      required
+                      className={`w-full border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
+                        errors.secondName ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
+                    {errors.secondName && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <i className="bi bi-exclamation-circle mr-1"></i>
+                        {errors.secondName}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -170,11 +320,19 @@ const ApplyNow: React.FC = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       id="phone"
-                      placeholder="Enter your phone number"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                      required
+                      placeholder="+250 xxx xxx xxx"
+                      className={`w-full border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
+                        errors.phone ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
+                    {errors.phone && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <i className="bi bi-exclamation-circle mr-1"></i>
+                        {errors.phone}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-xs font-medium text-gray-700 mb-1">
@@ -185,11 +343,19 @@ const ApplyNow: React.FC = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       id="email"
-                      placeholder="Enter your email"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                      required
+                      placeholder="example@email.com"
+                      className={`w-full border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
+                        errors.email ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <i className="bi bi-exclamation-circle mr-1"></i>
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -211,11 +377,19 @@ const ApplyNow: React.FC = () => {
                       name="district"
                       value={formData.district}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       id="district"
                       placeholder="Enter your district"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                      required
+                      className={`w-full border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
+                        errors.district ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
+                    {errors.district && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <i className="bi bi-exclamation-circle mr-1"></i>
+                        {errors.district}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="sector" className="block text-xs font-medium text-gray-700 mb-1">
@@ -226,11 +400,19 @@ const ApplyNow: React.FC = () => {
                       name="sector"
                       value={formData.sector}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       id="sector"
                       placeholder="Enter your sector"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                      required
+                      className={`w-full border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
+                        errors.sector ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
+                    {errors.sector && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <i className="bi bi-exclamation-circle mr-1"></i>
+                        {errors.sector}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="cell" className="block text-xs font-medium text-gray-700 mb-1">
@@ -241,11 +423,19 @@ const ApplyNow: React.FC = () => {
                       name="cell"
                       value={formData.cell}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       id="cell"
                       placeholder="Enter your cell"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                      required
+                      className={`w-full border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
+                        errors.cell ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
+                    {errors.cell && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <i className="bi bi-exclamation-circle mr-1"></i>
+                        {errors.cell}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="village" className="block text-xs font-medium text-gray-700 mb-1">
@@ -256,11 +446,19 @@ const ApplyNow: React.FC = () => {
                       name="village"
                       value={formData.village}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       id="village"
                       placeholder="Enter your village"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                      required
+                      className={`w-full border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
+                        errors.village ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
+                    {errors.village && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <i className="bi bi-exclamation-circle mr-1"></i>
+                        {errors.village}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -281,15 +479,23 @@ const ApplyNow: React.FC = () => {
                       name="status"
                       value={formData.status}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       id="status"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                      required
+                      className={`w-full border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
+                        errors.status ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     >
                       <option value="">Select Status</option>
                       <option value="single">Single</option>
                       <option value="married">Married</option>
                       <option value="divorced">Divorced</option>
                     </select>
+                    {errors.status && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <i className="bi bi-exclamation-circle mr-1"></i>
+                        {errors.status}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="gender" className="block text-xs font-medium text-gray-700 mb-1">
@@ -299,15 +505,23 @@ const ApplyNow: React.FC = () => {
                       name="gender"
                       value={formData.gender}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       id="gender"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                      required
+                      className={`w-full border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
+                        errors.gender ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     >
                       <option value="">Select Gender</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
                       <option value="other">Other</option>
                     </select>
+                    {errors.gender && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <i className="bi bi-exclamation-circle mr-1"></i>
+                        {errors.gender}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="dob" className="block text-xs font-medium text-gray-700 mb-1">
@@ -318,10 +532,19 @@ const ApplyNow: React.FC = () => {
                       name="dob"
                       value={formData.dob}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       id="dob"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                      required
+                      max={new Date().toISOString().split('T')[0]}
+                      className={`w-full border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 ${
+                        errors.dob ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
+                    {errors.dob && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <i className="bi bi-exclamation-circle mr-1"></i>
+                        {errors.dob}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -343,7 +566,7 @@ const ApplyNow: React.FC = () => {
               {/* Submit Button */}
               <div className="pt-4">
                 <button
-                  type="submit"
+                  onClick={handleSubmit}
                   className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg transition-all duration-300 text-sm group"
                 >
                   <div className="flex items-center justify-center space-x-2">
@@ -353,7 +576,7 @@ const ApplyNow: React.FC = () => {
                 </button>
               </div>
             </div>
-          </form>
+          </div>
         </div>
 
         {/* Footer Note */}
