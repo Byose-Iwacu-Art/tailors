@@ -34,9 +34,9 @@ const SchoolsPage: React.FC = () => {
     {
       id: 1,
       name: "Kigali Branch",
-      location: "Remera Market (Sar Motor)",
-      mapUrl: "https://maps.google.com/maps?q=remera+giporoso+sar+market+place&t=&z=15&ie=UTF8&iwloc=&output=embed",
-      address: "456 Kigali Ave, Kigali, Rwanda",
+      location: "Opposite Cyizere Fruits, Kimironko",
+      mapUrl: "https://maps.google.com/maps?q=29+KG+40+St+Kimironko+Kigali+Rwanda&t=&z=15&ie=UTF8&iwloc=&output=embed",
+      address: "29 KG 40 St, Kigali, Rwanda",
       principal: {
         name: "Gisele Umutoni",
         contact: "+250 788 282 252",

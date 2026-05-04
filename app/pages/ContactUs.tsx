@@ -16,8 +16,8 @@ const ContactUs = () => {
       id: 1,
       icon: "bi-geo-alt-fill",
       title: "Visit Our Campus",
-      primary: "Giporoso Market Place",
-      secondary: "SAR Motor, Kigali",
+      primary: "29 KG 40 St, Kigali",
+      secondary: "Opposite Cyizere Fruits, Kimironko",
       color: "from-yellow-500 to-orange-500"
     },
     {

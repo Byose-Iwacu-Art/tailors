@@ -136,7 +136,7 @@ const Footer = () => {
                   </div>
                   <div className="text-gray-300 group-hover:text-white transition-colors text-xs sm:text-sm">
                     <div className="space-y-1">
-                      <div>• Giporoso, Remera, Kigali</div>
+                      <div>• 29 KG 40 St, Kimironko, Kigali</div>
                       <div>• Youth center, Muhoza, Musanze</div>
                     </div>
                   </div>
